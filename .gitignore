@@ -4,8 +4,6 @@ gen
 proguard
 
 #Eclipse
-.project
-.classpath
 .settings
 
 #IntelliJ IDEA
