@@ -117,7 +117,7 @@ public class SugarRecord<T> {
                 Object columnValue = column.get(this);
                 
                 if (SugarRecord.class.isAssignableFrom(columnType)) {
-                    values.put(columnName, (columnValue != null) ? String.valueOf(((SugarRecord) columnValue).id) : "0");
+                    values.put(columnName, (columnValue != null) ? String.valueOf(((SugarRecord<?>) columnValue).id) : "0");
                 } else {
                     if (!"id".equalsIgnoreCase(columnName)) {
                         if (columnType.equals(Short.class) || columnType.equals(short.class)) {
@@ -257,7 +257,7 @@ public class SugarRecord<T> {
                     field.setDouble(this, cursor.getDouble(index));
                 } 
                 else if (fieldType.equals(boolean.class) || fieldType.equals(Boolean.class)) {
-                    field.setBoolean(this, cursor.getString(index).equals("true"));
+                    field.setBoolean(this, Boolean.parseBoolean(cursor.getString(index)) || cursor.getString(index).equals("1"));
                 } 
                 else if (fieldType.getName().equals("[B")) {
                     field.set(this, cursor.getBlob(index));
