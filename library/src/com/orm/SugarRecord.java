@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.net.Uri;
 import android.util.Log;
 import com.orm.dsl.Ignore;
 
@@ -104,7 +105,7 @@ public class SugarRecord<T> {
 
     }
 
-    void save(SQLiteDatabase db) {
+    protected void save(SQLiteDatabase db) {
         
         List<Field> columns = getTableFields();
         ContentValues values = new ContentValues(columns.size());
@@ -143,6 +144,9 @@ public class SugarRecord<T> {
                         }
                         else if (columnType.equals(Calendar.class)) {
                             values.put(columnName, column.get(this) != null ? ((Calendar) column.get(this)).getTimeInMillis() : null);
+                        }
+                        else if (columnType.equals(Uri.class)) {
+                            values.put(columnName, columnValue.toString());
                         }
                         else {
                             values.put(columnName, String.valueOf(columnValue));
@@ -229,7 +233,7 @@ public class SugarRecord<T> {
     }
 
     @SuppressWarnings("unchecked")
-    void inflate(Cursor cursor) {
+    protected void inflate(Cursor cursor) {
         Map<Field, Long> entities = new HashMap<Field, Long>();
         List<Field> columns = getTableFields();
         for (Field field : columns) {
@@ -270,6 +274,10 @@ public class SugarRecord<T> {
                 } 
                 else if (fieldType.equals(short.class) || fieldType.equals(Short.class)) {
                     field.setShort(this, cursor.getShort(index));
+                } 
+                else if (fieldType.equals(Uri.class)) {
+                    String uri = cursor.getString(index);
+                    field.set(this, Uri.parse(uri));
                 } 
                 else if (fieldType.equals(Timestamp.class)) {
                     long l = cursor.getLong(index);

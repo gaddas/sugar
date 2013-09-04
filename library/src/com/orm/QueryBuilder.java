@@ -18,12 +18,16 @@ public class QueryBuilder {
             return "INTEGER";
         }
 
-        if ((type.equals(Double.class)) || (type.equals(Double.TYPE)) || (type.equals(Float.class)) ||
+        if ((type.equals(Double.class)) || 
+                (type.equals(Double.TYPE)) || 
+                (type.equals(Float.class)) ||
                 (type.equals(Float.TYPE))) {
             return "FLOAT";
         }
 
-        if ((type.equals(String.class)) || (type.equals(Character.TYPE))) {
+        if ((type.equals(String.class)) || 
+                (type.equals(Character.TYPE)) ||
+                (type.equals(android.net.Uri.class))) {
             return "TEXT";
         }
 
