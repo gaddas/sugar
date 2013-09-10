@@ -148,6 +148,9 @@ public class SugarRecord<T> {
                         else if (columnType.equals(Uri.class)) {
                             values.put(columnName, columnValue.toString());
                         }
+                        else if (columnType.equals(byte[].class)) {
+                            values.put(columnName, (byte[]) columnValue);
+                        }
                         else {
                             values.put(columnName, String.valueOf(columnValue));
                         }
@@ -263,7 +266,7 @@ public class SugarRecord<T> {
                 else if (fieldType.equals(boolean.class) || fieldType.equals(Boolean.class)) {
                     field.setBoolean(this, Boolean.parseBoolean(cursor.getString(index)) || cursor.getString(index).equals("1"));
                 } 
-                else if (fieldType.getName().equals("[B")) {
+                else if (fieldType.equals(byte[].class)) {
                     field.set(this, cursor.getBlob(index));
                 } 
                 else if (fieldType.equals(int.class) || fieldType.equals(Integer.class)) {
