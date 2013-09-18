@@ -284,7 +284,7 @@ public class SugarRecord<T> {
                 } 
                 else if (fieldType.equals(String.class)) {
                     String val = cursor.getString(index);
-                    field.set(this, val.equals("null") ? null : val);
+                    field.set(this, val != null && val.equals("null") ? null : val);
                 } 
                 else if (fieldType.equals(double.class) || fieldType.equals(Double.class)) {
                     field.setDouble(this, cursor.getDouble(index));
