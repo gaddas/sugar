@@ -3,6 +3,7 @@ package com.orm;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
@@ -58,6 +59,12 @@ public class SugarRecord<T> {
         sqLiteDatabase.delete(getTableName(type), whereClause, whereArgs);
     }
 
+    public static <T extends SugarRecord<?>> void deleteById(Class<T> type, Long id) {
+        Database db = getSugarContext().database;
+        SQLiteDatabase sqLiteDatabase = db.getDB();
+        sqLiteDatabase.delete(getTableName(type), "id=?", new String[]{String.valueOf(id)});
+    }
+    
     public void save() {
         SQLiteDatabase sqLiteDatabase = getSugarContext().database.getDB();
         save(sqLiteDatabase);
@@ -81,7 +88,6 @@ public class SugarRecord<T> {
             sqLiteDatabase.endTransaction();
             sqLiteDatabase.setLockingEnabled(true);
         }
-
     }
 
     @SuppressWarnings("deprecation")
@@ -234,7 +240,27 @@ public class SugarRecord<T> {
         }
         return toRet;
     }
+    
+    public static <T extends SugarRecord<?>> long count(Class<T> type){
+        return count(type, null, new String[]{});
+    }
 
+    public static <T extends SugarRecord<?>> long count(Class<T> type, String query){
+        return count(type, query, new String[]{});
+    }
+
+    public static <T extends SugarRecord<?>> long count(Class<T> type, String query, String... arguments){
+         Database db = getSugarContext().database;
+         SQLiteDatabase sqLiteDatabase = db.getDB();
+         String table = getTableName(type);
+         try {
+             return DatabaseUtils.queryNumEntries(sqLiteDatabase, table, query, arguments);
+         } catch (Exception e) {
+             e.printStackTrace();
+             return -1;
+         } 
+    }
+    
     @SuppressWarnings("unchecked")
     protected void inflate(Cursor cursor) {
         Map<Field, Long> entities = new HashMap<Field, Long>();
