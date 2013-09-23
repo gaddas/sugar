@@ -60,7 +60,7 @@ public class SugarRecord<T> {
     }
 
     public static <T extends SugarRecord<?>> void deleteById(Class<T> type, Long id) {
-        Database db = getSugarContext().database;
+        Database db = getSugarContext().getDatabase();
         SQLiteDatabase sqLiteDatabase = db.getDB();
         sqLiteDatabase.delete(getTableName(type), "id=?", new String[]{String.valueOf(id)});
     }
@@ -250,7 +250,7 @@ public class SugarRecord<T> {
     }
 
     public static <T extends SugarRecord<?>> long count(Class<T> type, String query, String... arguments){
-         Database db = getSugarContext().database;
+         Database db = getSugarContext().getDatabase();
          SQLiteDatabase sqLiteDatabase = db.getDB();
          String table = getTableName(type);
          try {
