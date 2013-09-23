@@ -2,7 +2,7 @@ package com.orm;
 
 public class SugarApp extends android.app.Application{
 
-    Database database;
+    private Database database;
     private static SugarApp sugarContext;
 
     public void onCreate(){
@@ -24,5 +24,9 @@ public class SugarApp extends android.app.Application{
     
     public void deleteDatabase(){
         this.database.deleteDatabase();
+    }
+
+    protected Database getDatabase() {
+        return database;
     }
 }

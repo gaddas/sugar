@@ -34,27 +34,27 @@ public class SugarRecord<T> {
     public SugarRecord(Context context) {
         this.context = context;
         // this.application = (SugarApp) context.getApplicationContext();
-        this.database = ((SugarApp) context.getApplicationContext()).database;
+        this.database = ((SugarApp) context.getApplicationContext()).getDatabase();
     }
 
     public SugarRecord(){
         this.context = SugarApp.getSugarContext();
-        this.database = SugarApp.getSugarContext().database;
+        this.database = SugarApp.getSugarContext().getDatabase();
     }
 
     public void delete() {
-        SQLiteDatabase db = getSugarContext().database.getDB();
+        SQLiteDatabase db = getSugarContext().getDatabase().getDB();
         db.delete(this.tableName, "Id=?", new String[]{getId().toString()});
     }
 
     public static <T extends SugarRecord<?>> void deleteAll(Class<T> type) {
-        Database db = getSugarContext().database;
+        Database db = getSugarContext().getDatabase();
         SQLiteDatabase sqLiteDatabase = db.getDB();
         sqLiteDatabase.delete(getTableName(type), null, null);
     }
 
     public static <T extends SugarRecord<?>> void deleteAll(Class<T> type, String whereClause, String... whereArgs ) {
-        Database db = getSugarContext().database;
+        Database db = getSugarContext().getDatabase();
         SQLiteDatabase sqLiteDatabase = db.getDB();
         sqLiteDatabase.delete(getTableName(type), whereClause, whereArgs);
     }
@@ -66,49 +66,8 @@ public class SugarRecord<T> {
     }
     
     public void save() {
-        SQLiteDatabase sqLiteDatabase = getSugarContext().database.getDB();
+        SQLiteDatabase sqLiteDatabase = getSugarContext().getDatabase().getDB();
         save(sqLiteDatabase);
-    }
-
-    @SuppressWarnings("deprecation")
-    public static <T extends SugarRecord<?>> void saveInTx(T... objects ) {
-
-        SQLiteDatabase sqLiteDatabase = getSugarContext().database.getDB();
-
-        try{
-            sqLiteDatabase.beginTransaction();
-            sqLiteDatabase.setLockingEnabled(false);
-            for(T object: objects){
-                object.save(sqLiteDatabase);
-            }
-            sqLiteDatabase.setTransactionSuccessful();
-        }catch (Exception e){
-            Log.i("Sugar", "Error in saving in transaction " + e.getMessage());
-        }finally {
-            sqLiteDatabase.endTransaction();
-            sqLiteDatabase.setLockingEnabled(true);
-        }
-    }
-
-    @SuppressWarnings("deprecation")
-    public static <T extends SugarRecord<?>> void saveInTx(Collection<T> objects ) {
-
-        SQLiteDatabase sqLiteDatabase = getSugarContext().database.getDB();
-
-        try{
-            sqLiteDatabase.beginTransaction();
-            sqLiteDatabase.setLockingEnabled(false);
-            for(T object: objects){
-                object.save(sqLiteDatabase);
-            }
-            sqLiteDatabase.setTransactionSuccessful();
-        }catch (Exception e){
-            Log.i("Sugar", "Error in saving in transaction " + e.getMessage());
-        }finally {
-            sqLiteDatabase.endTransaction();
-            sqLiteDatabase.setLockingEnabled(true);
-        }
-
     }
 
     protected void save(SQLiteDatabase db) {
@@ -177,6 +136,47 @@ public class SugarRecord<T> {
         }
     }
 
+    @SuppressWarnings("deprecation")
+    public static <T extends SugarRecord<?>> void saveInTx(T... objects ) {
+
+        SQLiteDatabase sqLiteDatabase = getSugarContext().getDatabase().getDB();
+
+        try{
+            sqLiteDatabase.beginTransaction();
+            sqLiteDatabase.setLockingEnabled(false);
+            for(T object: objects){
+                object.save(sqLiteDatabase);
+            }
+            sqLiteDatabase.setTransactionSuccessful();
+        }catch (Exception e){
+            Log.i("Sugar", "Error in saving in transaction " + e.getMessage());
+        }finally {
+            sqLiteDatabase.endTransaction();
+            sqLiteDatabase.setLockingEnabled(true);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    public static <T extends SugarRecord<?>> void saveInTx(Collection<T> objects ) {
+
+        SQLiteDatabase sqLiteDatabase = getSugarContext().getDatabase().getDB();
+
+        try{
+            sqLiteDatabase.beginTransaction();
+            sqLiteDatabase.setLockingEnabled(false);
+            for(T object: objects){
+                object.save(sqLiteDatabase);
+            }
+            sqLiteDatabase.setTransactionSuccessful();
+        }catch (Exception e){
+            Log.i("Sugar", "Error in saving in transaction " + e.getMessage());
+        }finally {
+            sqLiteDatabase.endTransaction();
+            sqLiteDatabase.setLockingEnabled(true);
+        }
+
+    }
+
     public static <T extends SugarRecord<?>> List<T> listAll(Class<T> type) {
         return find(type, null, null, null, null, null);
     }
@@ -194,7 +194,7 @@ public class SugarRecord<T> {
 
     public static <T extends SugarRecord<?>> List<T> findWithQuery(Class<T> type, String query, String... arguments){
 
-        Database db = getSugarContext().database;
+        Database db = getSugarContext().getDatabase();
         SQLiteDatabase sqLiteDatabase = db.getDB();
         T entity;
         List<T> toRet = new ArrayList<T>();
@@ -215,13 +215,13 @@ public class SugarRecord<T> {
     }
 
     public static void executeQuery(String query, String... arguments){
-        getSugarContext().database.getDB().execSQL(query, arguments);
+        getSugarContext().getDatabase().getDB().execSQL(query, arguments);
     }
 
     public static <T extends SugarRecord<?>> List<T> find(Class<T> type,
                                                        String whereClause, String[] whereArgs,
                                                        String groupBy, String orderBy, String limit) {
-        Database db = getSugarContext().database;
+        Database db = getSugarContext().getDatabase();
         SQLiteDatabase sqLiteDatabase = db.getDB();
         T entity;
         List<T> toRet = new ArrayList<T>();
