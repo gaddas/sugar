@@ -45,6 +45,8 @@ public class SugarRecord<T> {
     public void delete() {
         SQLiteDatabase db = getSugarContext().getDatabase().getDB();
         db.delete(this.tableName, "Id=?", new String[]{getId().toString()});
+        Log.i("Sugar", getClass().getSimpleName() + " deleted: " + id);
+        id = null;
     }
 
     public static <T extends SugarRecord<?>> void deleteAll(Class<T> type) {
