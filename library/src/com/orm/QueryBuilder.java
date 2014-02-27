@@ -8,6 +8,10 @@ public class QueryBuilder {
                 (type.equals(java.util.Date.class)) ||
                 (type.equals(java.util.Calendar.class)) ||
                 (type.equals(java.sql.Date.class)) ||
+                (type.equals(Byte.class)) ||
+                (type.equals(Byte.TYPE)) ||
+                (type.equals(Short.class)) ||
+                (type.equals(Short.TYPE)) ||
                 (type.equals(Integer.class)) ||
                 (type.equals(Integer.TYPE)) ||
                 (type.equals(Long.class)) ||

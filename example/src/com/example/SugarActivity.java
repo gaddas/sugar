@@ -1,10 +1,13 @@
 package com.example;
 
+import com.orm.query.Select;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 public class SugarActivity extends Activity {
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -30,6 +33,8 @@ public class SugarActivity extends Activity {
 		Note n3 = new Note(10, "note3", "description3", t2);
 		Note n4 = new Note(10, "note4", "description4", t2);
 
+		if (!n1.Validate()) Log.e("TEST", "Validation before saving failed!");
+		
 		TextNote textNote = new TextNote();
 		textNote.desc = "Test";
 
@@ -49,5 +54,7 @@ public class SugarActivity extends Activity {
 		n3.setTitle("batrix");
 		n3.save();
 
+        Note existingNote = Select.from(Note.class).where("TITLE = ?", new String[] { "atrix" }).first();
+        if (!existingNote.Validate()) Log.e("TEST", "Validation after loading failed!");
 	}
 }

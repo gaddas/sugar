@@ -101,6 +101,9 @@ public class SugarRecord<T>{
                         if (columnValue == null) {
                             values.putNull(columnName);
                         }
+                        else if (columnType.equals(Byte.class) || columnType.equals(byte.class)) {
+                            values.put(columnName, (Byte) columnValue);
+                        } 
                         else if (columnType.equals(Short.class) || columnType.equals(short.class)) {
                             values.put(columnName, (Short) columnValue);
                         } 
@@ -347,6 +350,12 @@ public class SugarRecord<T>{
                 } 
                 else if (fieldType.equals(Short.class)) {
                     field.set(this, (Short) cursor.getShort(index));
+                } 
+                else if (fieldType.equals(byte.class)) {
+                    field.set(this, (byte) cursor.getShort(index));
+                } 
+                else if (fieldType.equals(Byte.class)) {
+                    field.set(this, (Byte) (byte) cursor.getShort(index));
                 } 
                 else if (fieldType.equals(Uri.class)) {
                     String uri = cursor.getString(index);
