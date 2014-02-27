@@ -3,6 +3,7 @@ package com.orm;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import dalvik.system.DexFile;
@@ -66,7 +67,7 @@ public class SugarDb extends SQLiteOpenHelper {
             return null;
         } else {
             try {
-                return (T) discoveredClass.getDeclaredConstructor(Context.class).newInstance(context);
+                return (T) discoveredClass.getDeclaredConstructor().newInstance();
             } catch (InstantiationException e) {
                 Log.e("Sugar", e.getMessage());
             } catch (IllegalAccessException e) {
@@ -132,9 +133,27 @@ public class SugarDb extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         Log.i("Sugar", "upgrading sugar");
+        // check if some tables are to be created
+        doUpgrade(sqLiteDatabase);
+
         if (!executeSugarUpgrade(sqLiteDatabase, oldVersion, newVersion)) {
             deleteTables(sqLiteDatabase);
             onCreate(sqLiteDatabase);
+        }
+    }
+
+    /**
+     * Create the tables that do not exist.
+     */
+    private <T extends SugarRecord<?>> void doUpgrade(SQLiteDatabase sqLiteDatabase) {
+        List<T> domainClasses = getDomainClasses(context);
+        for (T domain : domainClasses) {
+            try {// we try to do a select, if fails then (?) there isn't the table
+                sqLiteDatabase.query(domain.tableName, null, null, null, null, null, null);
+            } catch (SQLiteException e) {
+                Log.i("Sugar", String.format("creating table on update (error was '%s')", e.getMessage()));
+                createTable(domain, sqLiteDatabase);
+            }
         }
     }
 
@@ -174,20 +193,18 @@ public class SugarDb extends SQLiteOpenHelper {
     }
 
     private void executeScript(SQLiteDatabase db, String file) {
-        StringBuilder text = new StringBuilder();
         try {
             InputStream is = this.context.getAssets().open("sugar_upgrades/" + file);
             BufferedReader reader = new BufferedReader(new InputStreamReader(is));
             String line;
             while ((line = reader.readLine()) != null) {
-                text.append(line);
-                text.append("\n");
+                Log.i("Sugar script", line);
+                db.execSQL(line.toString());
             }
         } catch (IOException e) {
             Log.e("Sugar", e.getMessage());
         }
 
-        Log.i("Sugar", "script: " + text.toString());
-        db.execSQL(text.toString());
+        Log.i("Sugar", "script executed: " + file);
     }
 }

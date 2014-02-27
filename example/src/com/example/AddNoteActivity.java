@@ -9,7 +9,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-
 public class AddNoteActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,13 +37,12 @@ public class AddNoteActivity extends Activity {
 
         save.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                Tag tag = new Tag(AddNoteActivity.this, tagBox.getText().toString());
+                Tag tag = new Tag(tagBox.getText().toString());
                 tag.save();
-                new Note(AddNoteActivity.this, 10, titleBox.getText().toString(), descBox.getText().toString(),tag).save();
+                new Note( 10, titleBox.getText().toString(), descBox.getText().toString(),tag).save();
                 Intent intent = new Intent(AddNoteActivity.this, NoteListActivity.class);
                 startActivity(intent);
             }
         });
-
     }
 }

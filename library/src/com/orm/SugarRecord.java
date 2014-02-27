@@ -1,12 +1,13 @@
 package com.orm;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.database.sqlite.SQLiteStatement;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
 import com.orm.dsl.Ignore;
 
@@ -18,29 +19,12 @@ import java.util.*;
 
 import static com.orm.SugarApp.getSugarContext;
 
-public class SugarRecord<T> {
+public class SugarRecord<T>{
 
-    @Ignore
-    private Context context;
-    @Ignore
-    private SugarApp application;
-    @Ignore
-    private Database database;
     @Ignore
     String tableName = getSqlName();
 
     protected Long id = null;
-
-    public SugarRecord(Context context) {
-        this.context = context;
-        // this.application = (SugarApp) context.getApplicationContext();
-        this.database = ((SugarApp) context.getApplicationContext()).getDatabase();
-    }
-
-    public SugarRecord(){
-        this.context = SugarApp.getSugarContext();
-        this.database = SugarApp.getSugarContext().getDatabase();
-    }
 
     public void delete() {
         if (id != null)
@@ -71,12 +55,35 @@ public class SugarRecord<T> {
     }
     
     public void save() {
+        save(getSugarContext().getDatabase().getDB());
+    }
+
+    public static <T extends SugarRecord<?>> void saveInTx(T... objects ) {
+        saveInTx(Arrays.asList(objects));
+    }
+
+    @SuppressWarnings("deprecation")
+    public static <T extends SugarRecord<?>> void saveInTx(Collection<T> objects ) {
         SQLiteDatabase sqLiteDatabase = getSugarContext().getDatabase().getDB();
-        save(sqLiteDatabase);
+
+        try{
+            sqLiteDatabase.beginTransaction();
+            sqLiteDatabase.setLockingEnabled(false);
+            for(T object: objects){
+                object.save(sqLiteDatabase);
+            }
+            sqLiteDatabase.setTransactionSuccessful();
+        }catch (Exception e){
+            Log.i("Sugar", "Error in saving in transaction " + e.getMessage());
+        }finally {
+            sqLiteDatabase.endTransaction();
+            sqLiteDatabase.setLockingEnabled(true);
+        }
+
     }
 
     protected void save(SQLiteDatabase db) {
-        
+
         List<Field> columns = getTableFields();
         ContentValues values = new ContentValues(columns.size());
         for (Field column : columns) {
@@ -144,47 +151,6 @@ public class SugarRecord<T> {
         }
     }
 
-    @SuppressWarnings("deprecation")
-    public static <T extends SugarRecord<?>> void saveInTx(T... objects ) {
-
-        SQLiteDatabase sqLiteDatabase = getSugarContext().getDatabase().getDB();
-
-        try{
-            sqLiteDatabase.beginTransaction();
-            sqLiteDatabase.setLockingEnabled(false);
-            for(T object: objects){
-                object.save(sqLiteDatabase);
-            }
-            sqLiteDatabase.setTransactionSuccessful();
-        }catch (Exception e){
-            Log.i("Sugar", "Error in saving in transaction " + e.getMessage());
-        }finally {
-            sqLiteDatabase.endTransaction();
-            sqLiteDatabase.setLockingEnabled(true);
-        }
-    }
-
-    @SuppressWarnings("deprecation")
-    public static <T extends SugarRecord<?>> void saveInTx(Collection<T> objects ) {
-
-        SQLiteDatabase sqLiteDatabase = getSugarContext().getDatabase().getDB();
-
-        try{
-            sqLiteDatabase.beginTransaction();
-            sqLiteDatabase.setLockingEnabled(false);
-            for(T object: objects){
-                object.save(sqLiteDatabase);
-            }
-            sqLiteDatabase.setTransactionSuccessful();
-        }catch (Exception e){
-            Log.i("Sugar", "Error in saving in transaction " + e.getMessage());
-        }finally {
-            sqLiteDatabase.endTransaction();
-            sqLiteDatabase.setLockingEnabled(true);
-        }
-
-    }
-
     public static <T extends SugarRecord<?>> List<T> listAll(Class<T> type) {
         return find(type, null, null, null, null, null);
     }
@@ -193,6 +159,33 @@ public class SugarRecord<T> {
         List<T> list = find( type, "id=?", new String[]{String.valueOf(id)}, null, null, "1");
         if (list.isEmpty()) return null;
         return list.get(0);
+    }
+
+    public static <T extends SugarRecord<?>> Iterator<T> findAll(Class<T> type) {
+        return findAsIterator(type, null, null, null, null, null);
+    }
+
+    public static <T extends SugarRecord<?>> Iterator<T> findAsIterator(Class<T> type,
+                                                                        String whereClause, String... whereArgs) {
+        return findAsIterator(type, whereClause, whereArgs, null, null, null);
+    }
+
+    public static <T extends SugarRecord<?>> Iterator<T> findWithQueryAsIterator(Class<T> type, String query, String... arguments) {
+        Database db = getSugarContext().getDatabase();
+        SQLiteDatabase sqLiteDatabase = db.getDB();
+        Cursor c = sqLiteDatabase.rawQuery(query, arguments);
+        return new CursorIterator<T>(type, c);
+    }
+
+    public static <T extends SugarRecord<?>> Iterator<T> findAsIterator(Class<T> type,
+                                                                    String whereClause, String[] whereArgs,
+                                                                    String groupBy, String orderBy, String limit) {
+
+        Database db = getSugarContext().getDatabase();
+        SQLiteDatabase sqLiteDatabase = db.getDB();
+        Cursor c = sqLiteDatabase.query(getTableName(type), null,
+                whereClause, whereArgs, groupBy, null, orderBy, limit);
+        return new CursorIterator<T>(type, c);
     }
 
     public static <T extends SugarRecord<?>> List<T> find(Class<T> type,
@@ -210,7 +203,7 @@ public class SugarRecord<T> {
 
         try {
             while (c.moveToNext()) {
-                entity = type.getDeclaredConstructor(Context.class).newInstance(getSugarContext());
+                entity = type.getDeclaredConstructor().newInstance();
                 entity.inflate(c);
                 toRet.add(entity);
             }
@@ -237,7 +230,7 @@ public class SugarRecord<T> {
                 whereClause, whereArgs, groupBy, null, orderBy, limit);
         try {
             while (c.moveToNext()) {
-                entity = type.getDeclaredConstructor(Context.class).newInstance(getSugarContext());
+                entity = type.getDeclaredConstructor().newInstance();
                 entity.inflate(c);
                 toRet.add(entity);
             }
@@ -269,6 +262,34 @@ public class SugarRecord<T> {
          } 
     }
     
+    public static <T extends SugarRecord<?>> long count(Class<?> type,
+            String whereClause, String[] whereArgs,
+            String groupBy, String orderBy, String limit) {
+    	
+    	Database db = getSugarContext().getDatabase();
+        SQLiteDatabase sqLiteDatabase = db.getDB();
+
+        long toRet = -1;
+        String filter = (!TextUtils.isEmpty(whereClause)) ? " where "  + whereClause : "";
+        SQLiteStatement sqLiteStatament = sqLiteDatabase.compileStatement("SELECT count(*) FROM " + getTableName(type) + filter);
+
+        if (whereArgs != null) {
+            for (int i = whereArgs.length; i != 0; i--) {
+                sqLiteStatament.bindString(i, whereArgs[i - 1]);
+            }
+        }
+
+        try {
+            toRet = sqLiteStatament.simpleQueryForLong();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            sqLiteStatament.close();
+        }
+        
+        return toRet;
+    }
+
     @SuppressWarnings("unchecked")
     protected void inflate(Cursor cursor) {
         Map<Field, Long> entities = new HashMap<Field, Long>();
@@ -367,7 +388,7 @@ public class SugarRecord<T> {
                     // skip this, it's generated by ART
                 }
                 else
-                    Log.e("Sugar", "Class cannot be read from Sqlite3 database. Please check the type of field " + field.getName() + "(" + fieldType.getName() + ")");
+                    Log.e("Sugar", "Class cannot be read from Sqlite3 database. Please check the type of field " + field.getName() + " (" + fieldType.getName() + ")");
             } catch (IllegalArgumentException e) {
                 Log.e("Sugar", "Field set error (IllegalArgumentException). Please check the field " + field.getName());
             } catch (IllegalAccessException e) {
@@ -430,5 +451,47 @@ public class SugarRecord<T> {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    static class CursorIterator<E extends SugarRecord<?>> implements Iterator<E> {
+        Class<E> type;
+        Cursor cursor;
+
+        public CursorIterator(Class<E> type, Cursor cursor) {
+            this.type = type;
+            this.cursor = cursor;
+        }
+
+        public boolean hasNext() {
+            return cursor != null && !cursor.isClosed() && !cursor.isAfterLast();
+        }
+
+        public E next() {
+            E entity = null;
+            if (cursor == null || cursor.isAfterLast()) {
+                throw new NoSuchElementException();
+            }
+
+            if (cursor.isBeforeFirst()) {
+                cursor.moveToFirst();
+            }
+
+            try {
+                entity = type.getDeclaredConstructor().newInstance();
+                entity.inflate(cursor);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                cursor.moveToNext();
+                if (cursor.isAfterLast()) {
+                    cursor.close();
+                }
+            }
+            return entity;
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
     }
 }
