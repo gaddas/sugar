@@ -24,6 +24,7 @@ public class Note extends SugarRecord<Note> {
 	private byte[] testBytes;
 	private Calendar testDate;
 	private Calendar testDateNull;
+	private char testChar;
 
 	private Tag tag;
 
@@ -52,6 +53,7 @@ public class Note extends SugarRecord<Note> {
 		testBytes = new byte[] { 1, 2, 3, 4 };
 		testDate = Calendar.getInstance();
 		testDateNull = null;
+		testChar = 'c';
 	}
 
 	public boolean Validate() {
@@ -87,7 +89,9 @@ public class Note extends SugarRecord<Note> {
 			return false;
 		if (testDateNull != null)
 			return false;
-
+		if (testChar != 'c')
+			return false;
+		
 		return true;
 	}
 
