@@ -1,8 +1,10 @@
 package com.orm;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
+import android.content.pm.PackageManager;
+import net.sqlcipher.database.SQLiteDatabase;
+import net.sqlcipher.database.SQLiteException;
+import net.sqlcipher.database.SQLiteOpenHelper;
 
 import com.orm.util.ManifestHelper;
 import com.orm.util.SugarCursorFactory;
