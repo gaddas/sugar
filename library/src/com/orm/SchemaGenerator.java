@@ -2,8 +2,8 @@ package com.orm;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
+import net.sqlcipher.SQLException;
+import net.sqlcipher.database.SQLiteDatabase;
 import android.util.Log;
 import com.orm.dsl.Column;
 import com.orm.dsl.NotNull;

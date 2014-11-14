@@ -20,6 +20,7 @@ public class ManifestHelper {
     public final static String METADATA_VERSION = "VERSION";
     public final static String METADATA_DOMAIN_PACKAGE_NAME = "DOMAIN_PACKAGE_NAME";
     public final static String METADATA_QUERY_LOG = "QUERY_LOG";
+    public final static String METADATA_ENCRYPTION_KEY = "ENCRYPTION_KEY";
     /**
      * The default name for the database unless specified in the AndroidManifest.
      */
@@ -83,6 +84,16 @@ public class ManifestHelper {
      */
     public static boolean getDebugEnabled(Context context) {
         return getMetaDataBoolean(context, METADATA_QUERY_LOG);
+    }
+    
+    public static String getPassword(Context context) {
+        String databaseName = getMetaDataString(context, METADATA_ENCRYPTION_KEY);
+
+        if (databaseName == null) {
+            databaseName = "";
+        }
+
+        return databaseName;
     }
 
     private static String getMetaDataString(Context context, String name) {

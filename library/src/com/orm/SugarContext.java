@@ -8,9 +8,9 @@ public class SugarContext {
     private SugarDb sugarDb;
     private Context context;
 
-    private SugarContext(Context context) {
+    private SugarContext(Context context, String password) {
         this.context = context;
-        this.sugarDb = new SugarDb(context);
+        this.sugarDb = new SugarDb(context, password);
     }
     
     public static SugarContext getSugarContext() {
@@ -20,8 +20,8 @@ public class SugarContext {
         return instance;
     }
 
-    public static void init(Context context) {
-        instance = new SugarContext(context);
+    public static void init(Context context, String password) {
+        instance = new SugarContext(context, password);
     }
 
     public static void terminate() {

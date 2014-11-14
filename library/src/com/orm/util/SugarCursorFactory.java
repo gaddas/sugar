@@ -20,7 +20,6 @@ public class SugarCursorFactory implements SQLiteDatabase.CursorFactory {
         this.debugEnabled = debugEnabled;
     }
 
-    @SuppressWarnings("deprecation")
     public Cursor newCursor(SQLiteDatabase sqLiteDatabase,
             SQLiteCursorDriver sqLiteCursorDriver,
             String editTable,

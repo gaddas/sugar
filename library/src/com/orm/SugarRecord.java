@@ -8,7 +8,6 @@ import com.orm.util.NamingHelper;
 import com.orm.util.ReflectionUtil;
 import net.sqlcipher.Cursor;
 import net.sqlcipher.database.SQLiteDatabase;
-import net.sqlcipher.database.SQLiteException;
 import net.sqlcipher.database.SQLiteStatement;
 
 import java.lang.reflect.Field;
@@ -46,7 +45,6 @@ public class SugarRecord {
         saveInTx(Arrays.asList(objects));
     }
 
-    @SuppressWarnings("deprecation")
     public static <T> void saveInTx(Collection<T> objects) {
         SQLiteDatabase sqLiteDatabase = getSugarContext().getSugarDb().getDB();
         try {
