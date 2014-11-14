@@ -2,10 +2,8 @@ package com.orm;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
-import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 import com.orm.dsl.Table;
@@ -19,19 +17,9 @@ import static com.orm.SugarContext.getSugarContext;
 
 public class SugarRecord {
 
-    protected Long id = null;
+    public Long id = null;
 
-    public void delete() {
-        if (id != null)
-        {
-            SQLiteDatabase db = getSugarContext().getSugarDb().getDB();
-            db.delete(this.tableName, "Id=?", new String[]{getId().toString()});
-            Log.i("Sugar", getClass().getSimpleName() + " deleted: " + id);
-            id = null;
-        }
-    }
-
-    public static <T extends SugarRecord<?>> void deleteAll(Class<T> type) {
+    public static <T> void deleteAll(Class<T> type) {
         SugarDb db = getSugarContext().getSugarDb();
         SQLiteDatabase sqLiteDatabase = db.getDB();
         sqLiteDatabase.delete(NamingHelper.toSQLName(type), null, null);
@@ -42,11 +30,11 @@ public class SugarRecord {
         SQLiteDatabase sqLiteDatabase = db.getDB();
         sqLiteDatabase.delete(NamingHelper.toSQLName(type), whereClause, whereArgs);
     }
-
-    public static <T extends SugarRecord<?>> void deleteById(Class<T> type, Long id) {
-        Database db = getSugarContext().getSugarDb();
-        SQLiteDatabase sqLiteDatabase = db.getDB();
-        sqLiteDatabase.delete(getTableName(type), "id=?", new String[]{String.valueOf(id)});
+    
+    public static <T extends SugarRecord> void deleteById(Class<T> type, Long id) {
+    	SQLiteDatabase db = getSugarContext().getSugarDb().getDB();
+        db.delete(NamingHelper.toSQLName(type), "Id=?", new String[]{String.valueOf(id)});
+        Log.i("Sugar", type.getSimpleName() + " deleted: " + id);
     }
     
     public static <T> void saveInTx(T... objects) {
@@ -209,7 +197,8 @@ public class SugarRecord {
         if (SugarRecord.class.isAssignableFrom(object.getClass())) {
             ReflectionUtil.setFieldValueForId(object, id);
         }
-        Log.i("Sugar", object.getClass().getSimpleName() + " saved : " + id);
+        
+        Log.i("Sugar", object.getClass().getSimpleName() + " saved: " + id);
 
         return id;
     }
@@ -232,16 +221,19 @@ public class SugarRecord {
     }
 
     public void delete() {
-        SQLiteDatabase db = getSugarContext().getSugarDb().getDB();
-        db.delete(NamingHelper.toSQLName(getClass()), "Id=?", new String[]{getId().toString()});
-        Log.i("Sugar", getClass().getSimpleName() + " deleted : " + getId().toString());
+    	if (id != null)
+        {
+    		SQLiteDatabase db = getSugarContext().getSugarDb().getDB();
+        	db.delete(NamingHelper.toSQLName(getClass()), "Id=?", new String[]{getId().toString()});
+        	Log.i("Sugar", getClass().getSimpleName() + " deleted: " + getId().toString());
+        	id = null;
+        }
     }
-
+    
     public long save() {
         return save(getSugarContext().getSugarDb().getDB(), this);
     }
 
-    @SuppressWarnings("unchecked")
     void inflate(Cursor cursor) {
         inflate(cursor, this);
     }

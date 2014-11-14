@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class Select<T> implements Iterable {
+public class Select<T> implements Iterable<T> {
 
     private Class<T> record;
     private String[] arguments;

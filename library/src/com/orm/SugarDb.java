@@ -35,9 +35,7 @@ public class SugarDb extends SQLiteOpenHelper {
         if (this.sqLiteDatabase == null) {
             this.sqLiteDatabase = getWritableDatabase();
         }
-
-    public <T extends SugarRecord<?>> void deleteTables(SQLiteDatabase sqLiteDatabase) {
+        
         return this.sqLiteDatabase;
     }
-
 }

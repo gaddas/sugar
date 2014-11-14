@@ -31,6 +31,15 @@ public class SugarContext {
         instance.doTerminate();
     }
 
+    public static Context getContext()
+    {
+        if (instance == null) {
+            throw new NullPointerException("SugarContext has not been initialized properly. Call SugarContext.init(Context) in your Application.onCreate() method and SugarContext.terminate() in your Application.onTerminate() method.");
+        }
+        
+        return instance.context;
+    }
+    
     /*
      * Per issue #106 on Github, this method won't be called in
      * any real Android device. This method is used purely in
@@ -46,5 +55,4 @@ public class SugarContext {
     protected SugarDb getSugarDb() {
         return sugarDb;
     }
-
 }

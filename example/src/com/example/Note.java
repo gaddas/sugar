@@ -1,27 +1,20 @@
 package com.example;
 
+import java.util.Calendar;
+
 import com.orm.dsl.Column;
 import com.orm.dsl.Table;
 
 @Table(name = "Note")
 public class Note {
 
-    private long id;
-
+	protected Long id = null;
+	
     @Column(name = "noteId", unique = true, notNull = true)
     private int noteId;
 
     private String title;
     private String description;
-    private String name;
-    private Integer noteNumber = 2;
-    private Float tagNumber = 4.0f;
-    private float tagNo = 5.0f;
-    private Boolean isTag = true;
-    private boolean isTagged = false;
-    private Double noteTagNo = 40.5;
-    private double noteTagNumber = 24.4;
-    private Tag tag;
 
 	private Integer testIntegerObj;
 	private Integer testIntegerObjNull;
@@ -40,6 +33,8 @@ public class Note {
 	private Calendar testDate;
 	private Calendar testDateNull;
 	private char testChar;
+	private Character testCharObj;
+	private Character testCharObjNull;
 
 	private Tag tag;
 
@@ -69,6 +64,8 @@ public class Note {
 		testDate = Calendar.getInstance();
 		testDateNull = null;
 		testChar = 'c';
+		testCharObj = 'c';
+		testCharObjNull = null;
 	}
 
 	public boolean Validate() {
@@ -106,6 +103,10 @@ public class Note {
 			return false;
 		if (testChar != 'c')
 			return false;
+		if (testCharObj != 'c')
+			return false;
+		if (testCharObjNull != null)
+			return false;
 		
 		return true;
 	}
@@ -140,6 +141,6 @@ public class Note {
 
 	@Override
 	public String toString() {
-		return title + "id: " + id + " - " + tag + " " + tag.getId();
+		return title + "noteId: " + noteId + " - " + tag;
 	}
 }

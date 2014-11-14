@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
+import android.net.Uri;
 import android.util.Log;
 import com.orm.SugarRecord;
 import com.orm.dsl.Ignore;
@@ -21,7 +23,7 @@ import java.util.*;
 
 public class ReflectionUtil {
 
-    public static List<Field> getTableFields(Class table) {
+    public static List<Field> getTableFields(Class<?> table) {
         List<Field> fieldList = SugarConfig.getFields(table);
         if (fieldList != null) return fieldList;
 
@@ -59,23 +61,30 @@ public class ReflectionUtil {
             Object columnValue = column.get(object);
 
             if (SugarRecord.class.isAssignableFrom(columnType)) {
-                values.put(columnName,
-                        (columnValue != null)
-                                ? String.valueOf(((SugarRecord) columnValue).getId())
-                                : "0");
+                values.put(columnName, (columnValue != null) 
+                		? String.valueOf(((SugarRecord) columnValue).getId())
+                        : "0");
             } else {
-                if (columnType.equals(Short.class) || columnType.equals(short.class)) {
+            	if (columnValue == null) {
+                    values.putNull(columnName);
+                } else if (columnType.equals(Short.class) || columnType.equals(short.class)) {
                     values.put(columnName, (Short) columnValue);
                 } else if (columnType.equals(Integer.class) || columnType.equals(int.class)) {
                     values.put(columnName, (Integer) columnValue);
                 } else if (columnType.equals(Long.class) || columnType.equals(long.class)) {
                     values.put(columnName, (Long) columnValue);
+                } else if (columnType.equals(Byte.class) || columnType.equals(byte.class)) {
+                    values.put(columnName, (Byte) columnValue);
                 } else if (columnType.equals(Float.class) || columnType.equals(float.class)) {
                     values.put(columnName, (Float) columnValue);
                 } else if (columnType.equals(Double.class) || columnType.equals(double.class)) {
                     values.put(columnName, (Double) columnValue);
                 } else if (columnType.equals(Boolean.class) || columnType.equals(boolean.class)) {
                     values.put(columnName, (Boolean) columnValue);
+                } else if (columnType.equals(Character.class) || columnType.equals(char.class)) {
+                    values.put(columnName, (Integer) (int) ((Character) columnValue).charValue());
+                } else if (columnType.equals(Uri.class)) {
+                    values.put(columnName, columnValue.toString());
                 } else if (Timestamp.class.equals(columnType)) {
                     try {
                         values.put(columnName, ((Timestamp) column.get(object)).getTime());
@@ -95,11 +104,7 @@ public class ReflectionUtil {
                         values.put(columnName, (Long) null);
                     }
                 } else {
-                    if (columnValue == null) {
-                        values.putNull(columnName);
-                    } else {
-                        values.put(columnName, String.valueOf(columnValue));
-                    }
+                    values.put(columnName, String.valueOf(columnValue));
                 }
             }
 
@@ -108,10 +113,13 @@ public class ReflectionUtil {
         }
     }
 
-    public static void setFieldValueFromCursor(Cursor cursor, Field field, Object object) {
+    @SuppressWarnings("unchecked")
+	public static void setFieldValueFromCursor(Cursor cursor, Field field, Object object) {
+    	Map<Field, Long> entities = new HashMap<Field, Long>();
+    	
         field.setAccessible(true);
         try {
-            Class fieldType = field.getType();
+            Class<?> fieldType = field.getType();
             String colName = NamingHelper.toSQLName(field);
 
             int columnIndex = cursor.getColumnIndex(colName);
@@ -124,29 +132,29 @@ public class ReflectionUtil {
                 long cid = cursor.getLong(columnIndex);
                 field.set(object, Long.valueOf(cid));
             } else if (fieldType.equals(long.class) || fieldType.equals(Long.class)) {
-                field.set(object,
-                        cursor.getLong(columnIndex));
+                field.set(object, cursor.getLong(columnIndex));
+            } else if (fieldType.equals(byte.class)) {
+                field.set(object, (byte) cursor.getShort(columnIndex));
+            } else if (fieldType.equals(Byte.class)) {
+                field.set(object, (Byte) (byte) cursor.getShort(columnIndex));
             } else if (fieldType.equals(String.class)) {
                 String val = cursor.getString(columnIndex);
                 field.set(object, val != null && val.equals("null") ? null : val);
             } else if (fieldType.equals(double.class) || fieldType.equals(Double.class)) {
-                field.set(object,
-                        cursor.getDouble(columnIndex));
+                field.set(object, cursor.getDouble(columnIndex));
             } else if (fieldType.equals(boolean.class) || fieldType.equals(Boolean.class)) {
-                field.set(object,
-                        cursor.getString(columnIndex).equals("1"));
+                field.set(object, Boolean.parseBoolean(cursor.getString(columnIndex)) || cursor.getString(columnIndex).equals("1"));
             } else if (field.getType().getName().equals("[B")) {
-                field.set(object,
-                        cursor.getBlob(columnIndex));
+                field.set(object, cursor.getBlob(columnIndex));
             } else if (fieldType.equals(int.class) || fieldType.equals(Integer.class)) {
-                field.set(object,
-                        cursor.getInt(columnIndex));
+                field.set(object, cursor.getInt(columnIndex));
             } else if (fieldType.equals(float.class) || fieldType.equals(Float.class)) {
-                field.set(object,
-                        cursor.getFloat(columnIndex));
+                field.set(object, cursor.getFloat(columnIndex));
             } else if (fieldType.equals(short.class) || fieldType.equals(Short.class)) {
-                field.set(object,
-                        cursor.getShort(columnIndex));
+                field.set(object, cursor.getShort(columnIndex));
+            } else if (fieldType.equals(Uri.class)) {
+                String uri = cursor.getString(columnIndex);
+                field.set(object, Uri.parse(uri)); 
             } else if (fieldType.equals(Timestamp.class)) {
                 long l = cursor.getLong(columnIndex);
                 field.set(object, new Timestamp(l));
@@ -158,6 +166,10 @@ public class ReflectionUtil {
                 Calendar c = Calendar.getInstance();
                 c.setTimeInMillis(l);
                 field.set(object, c);
+            } else if (fieldType.equals(char.class)) {
+                field.set(object, (char) cursor.getInt(columnIndex));
+            } else if (fieldType.equals(Character.class)) {
+                field.set(object, (Character) (char) cursor.getInt(columnIndex)); 
             } else if (Enum.class.isAssignableFrom(fieldType)) {
                 try {
                     Method valueOf = field.getType().getMethod("valueOf", String.class);
@@ -167,12 +179,27 @@ public class ReflectionUtil {
                 } catch (Exception e) {
                     Log.e("Sugar", "Enum cannot be read from Sqlite3 database. Please check the type of field " + field.getName());
                 }
+            } else if (SugarRecord.class.isAssignableFrom(fieldType)) {
+                long id = cursor.getLong(columnIndex);
+                if (id > 0)
+                	entities.put(field, id);
+                else
+                	field.set(object, null);
             } else
                 Log.e("Sugar", "Class cannot be read from Sqlite3 database. Please check the type of field " + field.getName() + "(" + field.getType().getName() + ")");
         } catch (IllegalArgumentException e) {
-            Log.e("field set error", e.getMessage());
+        	Log.e("Sugar", "Field set error (IllegalArgumentException). Please check the field " + field.getName());
         } catch (IllegalAccessException e) {
-            Log.e("field set error", e.getMessage());
+        	Log.e("Sugar", "Field set error (IllegalAccessException). Please check the field " + field.getName());
+        }
+        
+        for (Field f : entities.keySet()) {
+            try {
+            	f.set(object, SugarRecord.findById((Class<? extends SugarRecord>) f.getType(), entities.get(f)));
+            } catch (SQLiteException e) {
+            } catch (IllegalArgumentException e) {
+            } catch (IllegalAccessException e) {
+            }
         }
     }
 
@@ -190,12 +217,12 @@ public class ReflectionUtil {
         }
     }
 
-    public static List<Class> getDomainClasses(Context context) {
-        List<Class> domainClasses = new ArrayList<Class>();
+    public static List<Class<?>> getDomainClasses(Context context) {
+        List<Class<?>> domainClasses = new ArrayList<Class<?>>();
         try {
             for (String className : getAllClasses(context)) {
                 if (className.startsWith(ManifestHelper.getDomainPackageName(context))) {
-                    Class domainClass = getDomainClass(className, context);
+                    Class<?> domainClass = getDomainClass(className, context);
                     if (domainClass != null) domainClasses.add(domainClass);
                 }
             }
@@ -209,7 +236,7 @@ public class ReflectionUtil {
     }
 
 
-    private static Class getDomainClass(String className, Context context) {
+    private static Class<?> getDomainClass(String className, Context context) {
         Class<?> discoveredClass = null;
         try {
             discoveredClass = Class.forName(className, true, context.getClass().getClassLoader());
@@ -230,7 +257,6 @@ public class ReflectionUtil {
             return null;
         }
     }
-
 
     private static List<String> getAllClasses(Context context) throws PackageManager.NameNotFoundException, IOException {
         String path = getSourcePath(context);

@@ -1,9 +1,10 @@
 package com.example;
 
+import com.orm.SugarRecord;
 import com.orm.dsl.Table;
 
 @Table(name = "tag")
-public class Tag {
+public class Tag extends SugarRecord {
     private String name;
 
 	public Tag(String name) {

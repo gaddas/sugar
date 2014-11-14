@@ -33,15 +33,15 @@ public class SchemaGenerator {
     }
 
     public void createDatabase(SQLiteDatabase sqLiteDatabase) {
-        List<Class> domainClasses = getDomainClasses(context);
-        for (Class domain : domainClasses) {
+        List<Class<?>> domainClasses = getDomainClasses(context);
+        for (Class<?> domain : domainClasses) {
             createTable(domain, sqLiteDatabase);
         }
     }
 
     public void doUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        List<Class> domainClasses = getDomainClasses(context);
-        for (Class domain : domainClasses) {
+        List<Class<?>> domainClasses = getDomainClasses(context);
+        for (Class<?> domain : domainClasses) {
             try {  // we try to do a select, if fails then (?) there isn't the table
                 sqLiteDatabase.query(NamingHelper.toSQLName(domain), null, null, null, null, null, null);
             } catch (SQLiteException e) {
@@ -54,8 +54,8 @@ public class SchemaGenerator {
     }
 
     public void deleteTables(SQLiteDatabase sqLiteDatabase) {
-        List<Class> tables = getDomainClasses(context);
-        for (Class table : tables) {
+        List<Class<?>> tables = getDomainClasses(context);
+        for (Class<?> table : tables) {
             sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + NamingHelper.toSQLName(table));
         }
     }

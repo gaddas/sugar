@@ -14,9 +14,10 @@ public class QueryBuilder {
                 (type.equals(Integer.class)) ||
                 (type.equals(Integer.TYPE)) ||
                 (type.equals(Long.class)) ||
-                (type.equals(Long.TYPE)) || (
-                (!type.isPrimitive()) &&
-                        (SugarRecord.class.isAssignableFrom(type))))  {
+                (type.equals(Long.TYPE)) ||
+                (type.equals(Character.TYPE)) ||
+                (type.equals(Character.class)) ||
+                ((!type.isPrimitive()) && (SugarRecord.class.isAssignableFrom(type))))  {
             return "INTEGER";
         }
 
@@ -40,7 +41,6 @@ public class QueryBuilder {
         }
 
         if ((type.equals(String.class)) || 
-                (type.equals(Character.TYPE)) ||
                 (type.equals(android.net.Uri.class))) {
             return "TEXT";
         }
