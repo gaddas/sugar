@@ -1,13 +1,12 @@
-package com.orm;
+package com.orm.util;
+
+import com.orm.SugarRecord;
 
 public class QueryBuilder {
 
     public static String getColumnType(Class<?> type) {
         if ((type.equals(Boolean.class)) ||
                 (type.equals(Boolean.TYPE)) ||
-                (type.equals(java.util.Date.class)) ||
-                (type.equals(java.util.Calendar.class)) ||
-                (type.equals(java.sql.Date.class)) ||
                 (type.equals(Byte.class)) ||
                 (type.equals(Byte.TYPE)) ||
                 (type.equals(Short.class)) ||
@@ -21,9 +20,17 @@ public class QueryBuilder {
             return "INTEGER";
         }
 
-        if ((type.equals(Double.class)) || 
-                (type.equals(Double.TYPE)) || 
-                (type.equals(Float.class)) ||
+        if ((type.equals(java.util.Date.class)) ||
+                (type.equals(java.sql.Date.class)) ||
+                (type.equals(java.util.Calendar.class))) {
+            return "INTEGER NULL";
+        }
+
+        if (type.getName().equals("[B")) {
+            return "BLOB";
+        }
+
+        if ((type.equals(Double.class)) || (type.equals(Double.TYPE)) || (type.equals(Float.class)) ||
                 (type.equals(Float.TYPE))) {
             return "FLOAT";
         }
@@ -40,4 +47,5 @@ public class QueryBuilder {
 
         return "";
     }
+
 }

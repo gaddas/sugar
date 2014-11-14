@@ -1,3 +1,12 @@
+library/bin
+library/build
+library/gen
+library/.project
+library/.classpath
+library/library.iml
+library/.gradle
+*.class
+.DS_Store
 #Android generated
 bin
 gen

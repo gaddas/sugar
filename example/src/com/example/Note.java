@@ -1,12 +1,27 @@
 package com.example;
 
-import java.util.Calendar;
-import com.orm.SugarRecord;
+import com.orm.dsl.Column;
+import com.orm.dsl.Table;
 
-public class Note extends SugarRecord<Note> {
-	private int noteId;
-	private String title;
-	private String description;
+@Table(name = "Note")
+public class Note {
+
+    private long id;
+
+    @Column(name = "noteId", unique = true, notNull = true)
+    private int noteId;
+
+    private String title;
+    private String description;
+    private String name;
+    private Integer noteNumber = 2;
+    private Float tagNumber = 4.0f;
+    private float tagNo = 5.0f;
+    private Boolean isTag = true;
+    private boolean isTagged = false;
+    private Double noteTagNo = 40.5;
+    private double noteTagNumber = 24.4;
+    private Tag tag;
 
 	private Integer testIntegerObj;
 	private Integer testIntegerObjNull;

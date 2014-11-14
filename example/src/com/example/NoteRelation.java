@@ -1,11 +1,12 @@
 package com.example;
 
 import android.content.Context;
-import com.orm.SugarRecord;
+import com.orm.dsl.Table;
 
-public class NoteRelation extends SugarRecord<Note> {
-	String name;
-	int noteId;
+@Table(name = "note_relation")
+public class NoteRelation {
+    String name;
+    int noteId;
 
 	public NoteRelation() {
 	}
