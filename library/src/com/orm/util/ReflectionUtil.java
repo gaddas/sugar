@@ -85,6 +85,8 @@ public class ReflectionUtil {
                     values.put(columnName, (Integer) (int) ((Character) columnValue).charValue());
                 } else if (columnType.equals(Uri.class)) {
                     values.put(columnName, columnValue.toString());
+                } else if (columnType.equals(byte[].class)) {
+                    values.put(columnName, (byte[]) columnValue);
                 } else if (Timestamp.class.equals(columnType)) {
                     try {
                         values.put(columnName, ((Timestamp) column.get(object)).getTime());
@@ -144,8 +146,8 @@ public class ReflectionUtil {
                 field.set(object, cursor.getDouble(columnIndex));
             } else if (fieldType.equals(boolean.class) || fieldType.equals(Boolean.class)) {
                 field.set(object, Boolean.parseBoolean(cursor.getString(columnIndex)) || cursor.getString(columnIndex).equals("1"));
-            } else if (field.getType().getName().equals("[B")) {
-                field.set(object, cursor.getBlob(columnIndex));
+            } else if (fieldType.equals(byte[].class)) {
+                field.set(object, cursor.getBlob(columnIndex)); 
             } else if (fieldType.equals(int.class) || fieldType.equals(Integer.class)) {
                 field.set(object, cursor.getInt(columnIndex));
             } else if (fieldType.equals(float.class) || fieldType.equals(Float.class)) {

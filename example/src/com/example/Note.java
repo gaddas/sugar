@@ -97,6 +97,14 @@ public class Note {
 			return false;
 		if (testBytes == null)
 			return false;
+		if (testBytes[0] != 1)
+			return false;
+		if (testBytes[1] != 2)
+			return false;
+		if (testBytes[2] != 3)
+			return false;
+		if (testBytes[3] != 4)
+			return false;
 		if (testDate == null)
 			return false;
 		if (testDateNull != null)

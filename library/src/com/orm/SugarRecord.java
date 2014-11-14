@@ -26,7 +26,7 @@ public class SugarRecord {
         
         String tableName = NamingHelper.toSQLName(type);
         sqLiteDatabase.delete(tableName, null, null);
-        sqLiteDatabase.delete("sqlite_sequence", "WHERE name=?", new String[] { tableName });
+        sqLiteDatabase.delete("sqlite_sequence", "name=?", new String[] { tableName });
     }
 
     public static <T> void deleteAll(Class<T> type, String whereClause, String... whereArgs) {
